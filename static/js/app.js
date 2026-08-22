@@ -77,7 +77,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    console.log('منصة سوق الخدمات - تم تحميل JavaScript بنجاح ✓');
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+        const reveal = new IntersectionObserver((entries, observer) => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); } }), { threshold: 0.08 });
+        document.querySelectorAll('.service-card, .feature-box, .card').forEach((item, index) => { item.classList.add('reveal-item'); item.style.transitionDelay = `${Math.min(index % 6, 5) * 45}ms`; reveal.observe(item); });
+    }
 });
 
 // دالة مساعدة لعرض رسالة Toast

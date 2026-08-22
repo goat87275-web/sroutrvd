@@ -58,17 +58,17 @@
                             {% endif %}
                         </div>
 
-                        <!-- المدينة -->
-                        <div class="mb-3">
-                            <label for="{{ form.city.id_for_label }}" class="form-label">
+                        <!-- الموقع -->
+                        <div class="row g-3 mb-3">
+                          <div class="col-md-6">
+                            <label for="{{ form.location_city.id_for_label }}" class="form-label">
                                 <i class="bi bi-geo-alt ms-2"></i>
-                                {{ form.city.label }}
+                                {{ form.location_city.label }}
                                 <span class="text-muted small">(اختياري)</span>
                             </label>
-                            {{ form.city }}
-                            {% if form.city.errors %}
-                            <div class="text-danger small mt-1">{{ form.city.errors.0 }}</div>
-                            {% endif %}
+                            {{ form.location_city }}{% if form.location_city.errors %}<div class="text-danger small mt-1">{{ form.location_city.errors.0 }}</div>{% endif %}
+                          </div>
+                          <div class="col-md-6"><label for="{{ form.location_district.id_for_label }}" class="form-label"><i class="bi bi-pin-map ms-2"></i>{{ form.location_district.label }}</label>{{ form.location_district }}{% if form.location_district.errors %}<div class="text-danger small mt-1">{{ form.location_district.errors.0 }}</div>{% endif %}</div>
                         </div>
 
                         <!-- نوع الحساب -->
@@ -144,3 +144,9 @@
     </div>
 </div>
 {% endblock %}
+{% block extra_js %}<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const city = document.getElementById('id_location_city'), district = document.getElementById('id_location_district');
+  if (!city || !district) return;
+  city.addEventListener('change', async () => { district.innerHTML = '<option value="">اختر المديرية</option>'; if (!city.value) return; const data = await fetch('{% url "accounts:districts_for_city" %}?city=' + encodeURIComponent(city.value)).then(r => r.json()); data.districts.forEach(item => district.add(new Option(item.name, item.id))); });
+});</script>{% endblock %}
