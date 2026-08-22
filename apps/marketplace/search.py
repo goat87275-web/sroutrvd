@@ -20,8 +20,8 @@ def filter_public_providers(params):
     min_rating = params.get('min_rating')
     min_experience = params.get('min_experience')
     availability = params.get('availability')
-    if city: qs = qs.filter(provider_profile__city__icontains=city)
-    if district: qs = qs.filter(provider_profile__district__icontains=district)
+    if city: qs = qs.filter(provider_profile__location_city_id=city) if str(city).isdigit() else qs.filter(provider_profile__city__icontains=city)
+    if district: qs = qs.filter(provider_profile__location_district_id=district) if str(district).isdigit() else qs.filter(provider_profile__district__icontains=district)
     if service: qs = qs.filter(services__id=service)
     if category: qs = qs.filter(services__category_id=category)
     if min_rating: qs = qs.filter(provider_profile__average_rating__gte=min_rating)
@@ -54,8 +54,8 @@ def filter_public_services(params):
     if q:
         qs=qs.filter(Q(title__icontains=q)|Q(description__icontains=q)|Q(provider__username__icontains=q)|Q(category__name__icontains=q))
     city=params.get('city'); district=params.get('district')
-    if city: qs=qs.filter(provider__provider_profile__city__icontains=city)
-    if district: qs=qs.filter(provider__provider_profile__district__icontains=district)
+    if city: qs=qs.filter(provider__provider_profile__location_city_id=city) if str(city).isdigit() else qs.filter(provider__provider_profile__city__icontains=city)
+    if district: qs=qs.filter(provider__provider_profile__location_district_id=district) if str(district).isdigit() else qs.filter(provider__provider_profile__district__icontains=district)
     return qs
 
 

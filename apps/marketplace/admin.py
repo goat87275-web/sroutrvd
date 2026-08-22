@@ -4,7 +4,18 @@ Admin configuration for marketplace app
 """
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Category, Service, ProviderService
+from .models import Category, Service, ProviderService, ManagedService, Specialization, Qualification
+
+class CatalogChoiceAdmin(admin.ModelAdmin):
+    list_display=['name','is_active','order','updated_at']; list_filter=['is_active']; search_fields=['name']; ordering=['order','name']
+@admin.register(Specialization)
+class SpecializationAdmin(CatalogChoiceAdmin): pass
+@admin.register(Qualification)
+class QualificationAdmin(CatalogChoiceAdmin): pass
+@admin.register(ManagedService)
+class ManagedServiceAdmin(CatalogChoiceAdmin):
+    list_display=['name','category','is_active','order','updated_at']; list_filter=['is_active','category']; search_fields=['name','description','category__name']
+    fieldsets=(('الخدمة',{'fields':('name','description','category')}),('النشر',{'fields':('is_active','order')}))
 
 
 @admin.register(Category)
@@ -102,7 +113,7 @@ class ServiceAdmin(admin.ModelAdmin):
 
 @admin.register(ProviderService)
 class ProviderServiceAdmin(admin.ModelAdmin):
-    list_display=['provider','service','price','price_type','estimated_duration','is_active','created_at']
-    list_filter=['is_active','price_type','service__category','created_at']
-    search_fields=['provider__user__username','service__title','description']
+    list_display=['provider','catalog_service','service','approval_status','price','price_type','estimated_duration','is_active','created_at']
+    list_filter=['approval_status','is_active','price_type','catalog_service','service__category','created_at']
+    search_fields=['provider__user__username','service__title','catalog_service__name','description']
     raw_id_fields=['provider','service']

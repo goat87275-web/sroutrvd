@@ -11,8 +11,8 @@ from django.contrib import messages
 from django.db import transaction
 from django.views.generic import DetailView
 from django.contrib.auth import login as auth_login, logout as auth_logout
-from .forms import UserRegisterForm, UserLoginForm, UserProfileForm, ProviderProfileForm
-from .models import User, ProviderProfile, ProviderDocument, ProviderDocumentType
+from .forms import UserRegisterForm, UserLoginForm, UserProfileForm, ProviderProfileForm, ProviderVerificationRequestForm
+from .models import User, ProviderProfile, ProviderDocument, ProviderDocumentType, ProviderVerificationRequest
 from . import services
 from .utils import get_provider_onboarding_status
 from apps.core.models import TermsAcceptance
@@ -151,6 +151,11 @@ def provider_profile_edit_view(request):
                     user_form.save()
                     provider = provider_form.save(commit=False)
                     provider.user = request.user
+                    # Keep legacy text columns populated for older order/search records.
+                    if provider.location_city_id:
+                        provider.city = provider.location_city.name
+                    if provider.location_district_id:
+                        provider.district = provider.location_district.name
                     provider.save()
                     _sync_provider_wallets(request, provider)
             except ValidationError as exc:
@@ -183,6 +188,7 @@ def provider_profile_edit_view(request):
         'provider_wallets': provider_wallets,
         'wallet_rows': wallet_rows,
         'maps_api_key': settings.MAPS_API_KEY,
+        'verification_form': ProviderVerificationRequestForm(provider=profile),
     }
     
     return render(request, 'accounts/provider_profile_edit.html', context)
@@ -303,6 +309,10 @@ def provider_submit_review(request):
         messages.error(request, 'هذه الصفحة لمقدمي الخدمات فقط.'); return redirect('home')
     profile = services.get_provider_profile(request.user)
     if request.method == 'POST':
+        verification_form = ProviderVerificationRequestForm(request.POST, provider=profile)
+        if not verification_form.is_valid():
+            messages.error(request, 'اختر خدمات أساسية صالحة قبل إرسال طلب التوثيق.')
+            return redirect('accounts:provider_profile_edit')
         checklist, can_submit = get_provider_onboarding_status(profile)
         terms = active_terms()
         if not terms or not TermsAcceptance.objects.filter(user=request.user, terms=terms).exists():
@@ -312,11 +322,21 @@ def provider_submit_review(request):
             missing = ', '.join([key for key, ok in checklist.items() if not ok])
             messages.error(request, f'لا يمكن إرسال طلب المراجعة. أكمل المتطلبات الناقصة: {missing}')
             return redirect('accounts:provider_profile_edit')
+        verification = verification_form.save(commit=False); verification.provider = profile; verification.save(); verification_form.save_m2m()
         profile.verification_status = 'pending_review'; profile.status = 'inactive'; profile.save(update_fields=['verification_status','status','updated_at'])
         from apps.core.services import notify
         for admin in User.objects.filter(is_staff=True): notify(admin,'provider_submitted','طلب توثيق جديد',f'{request.user.username} أرسل حسابه للمراجعة')
         messages.success(request, 'تم إرسال ملفك للمراجعة.')
     return redirect('accounts:profile')
+
+
+def districts_for_city(request):
+    """Small database-backed endpoint used by the location selects; no hard-coded data."""
+    from django.http import JsonResponse
+    from apps.core.models import District
+    city_id = request.GET.get('city')
+    districts = District.objects.filter(city_id=city_id, is_active=True).values('id', 'name') if city_id else []
+    return JsonResponse({'districts': list(districts)})
 
 
 @login_required

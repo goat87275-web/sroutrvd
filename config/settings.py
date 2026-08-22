@@ -204,7 +204,7 @@ JAZZMIN_SETTINGS = {
     'copyright': 'منصة سوق الخدمات © 2026',
 
     # البحث
-    'search_model': ['accounts.User', 'marketplace.Service', 'orders.Order'],
+    'search_model': ['accounts.User', 'accounts.ProviderProfile', 'marketplace.Service', 'marketplace.ManagedService', 'orders.Order'],
 
     # المستخدم
     'user_avatar': None,
@@ -229,6 +229,7 @@ JAZZMIN_SETTINGS = {
     # ترتيب التطبيقات والموديلات
     'order_with_respect_to': [
         'accounts',
+        'core',
         'marketplace',
         'orders',
         'reviews',
@@ -242,9 +243,15 @@ JAZZMIN_SETTINGS = {
         'accounts': 'fas fa-user-shield',
         'accounts.user': 'fas fa-users',
         'accounts.providerprofile': 'fas fa-id-badge',
+        'accounts.providerverificationrequest': 'fas fa-user-check',
+        'core.city': 'fas fa-city',
+        'core.district': 'fas fa-map-marked-alt',
         'marketplace': 'fas fa-store',
         'marketplace.category': 'fas fa-th-large',
         'marketplace.service': 'fas fa-concierge-bell',
+        'marketplace.managedservice': 'fas fa-list-check',
+        'marketplace.specialization': 'fas fa-user-tag',
+        'marketplace.qualification': 'fas fa-graduation-cap',
         'orders': 'fas fa-shopping-cart',
         'orders.order': 'fas fa-file-invoice',
         # 'orders.milestone': 'fas fa-tasks', # مجمد مؤقتاً
