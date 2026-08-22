@@ -2,15 +2,22 @@
 Views لتطبيق accounts (تسجيل، دخول، ملف شخصي)
 Views for accounts app
 """
+from pathlib import Path
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db import transaction
 from django.views.generic import DetailView
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from .forms import UserRegisterForm, UserLoginForm, UserProfileForm, ProviderProfileForm
 from .models import User, ProviderProfile, ProviderDocument, ProviderDocumentType
 from . import services
 from .utils import get_provider_onboarding_status
+from apps.core.models import TermsAcceptance
+from apps.payments.models import Wallet, ProviderWallet
+from apps.payments.services import active_terms
 
 
 def register_view(request):
@@ -135,25 +142,47 @@ def provider_profile_edit_view(request):
     profile = services.get_provider_profile(request.user)
     
     if request.method == 'POST':
-        user_form = UserProfileForm(request.POST, instance=request.user)
-        provider_form = ProviderProfileForm(request.POST, request.FILES, instance=profile)
+        user_form = UserProfileForm(request.POST, instance=request.user, prefix='user')
+        provider_form = ProviderProfileForm(request.POST, request.FILES, instance=profile, prefix='provider')
         
         if user_form.is_valid() and provider_form.is_valid():
-            user_form.save()
-            provider_form.save()
-            messages.success(request, 'تم تحديث ملفك الشخصي بنجاح.')
-            return redirect('accounts:provider_profile_edit')
+            try:
+                with transaction.atomic():
+                    user_form.save()
+                    provider = provider_form.save(commit=False)
+                    provider.user = request.user
+                    provider.save()
+                    _sync_provider_wallets(request, provider)
+            except ValidationError as exc:
+                provider_form.add_error(None, exc)
+                messages.error(request, 'تعذر حفظ المحافظ. تحقق من أرقام الحسابات والمحافظ المحددة.')
+            else:
+                profile.refresh_from_db()
+                messages.success(request, 'تم تحديث ملفك الشخصي بنجاح وحفظ البيانات في قاعدة البيانات.')
+                return redirect('accounts:provider_profile_edit')
+        messages.error(request, 'تعذر حفظ ملف مقدم الخدمة. راجع أخطاء الحقول أدناه.')
     else:
-        user_form = UserProfileForm(instance=request.user)
-        provider_form = ProviderProfileForm(instance=profile)
+        user_form = UserProfileForm(instance=request.user, prefix='user')
+        provider_form = ProviderProfileForm(instance=profile, prefix='provider')
     
     checklist, can_submit = get_provider_onboarding_status(profile)
+    terms = active_terms()
+    accepted_terms = TermsAcceptance.objects.filter(user=request.user, terms=terms).first() if terms else None
+    active_wallets = Wallet.objects.filter(is_active=True).order_by('display_order', 'name')
+    provider_wallets = {pw.wallet_id: pw for pw in ProviderWallet.objects.filter(provider=profile).select_related('wallet')}
+    wallet_rows = [(wallet, provider_wallets.get(wallet.pk)) for wallet in active_wallets]
     context = {
         'user_form': user_form,
         'provider_form': provider_form,
         'profile': profile,
         'verification_checklist': checklist,
         'can_submit_for_review': can_submit,
+        'terms': terms,
+        'accepted_terms': accepted_terms,
+        'active_wallets': active_wallets,
+        'provider_wallets': provider_wallets,
+        'wallet_rows': wallet_rows,
+        'maps_api_key': settings.MAPS_API_KEY,
     }
     
     return render(request, 'accounts/provider_profile_edit.html', context)
@@ -209,6 +238,44 @@ def role_required(allowed_roles):
         return wrapped_view
     return decorator
 
+
+@login_required
+def accept_commission_policy(request):
+    if not request.user.is_provider():
+        messages.error(request, 'هذه الصفحة لمقدمي الخدمات فقط.'); return redirect('home')
+    if request.method == 'POST':
+        terms = active_terms()
+        if not terms:
+            messages.error(request, 'لا توجد سياسة عمولة فعالة. يرجى انتظار الإدارة لإعدادها.')
+            return redirect('accounts:provider_profile_edit')
+        ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', '')).split(',')[0] or None
+        acceptance, created = TermsAcceptance.objects.get_or_create(user=request.user, terms=terms, defaults={'commission_rate': terms.commission_rate, 'ip_address': ip})
+        if created:
+            from apps.core.services import notify
+            notify(request.user, 'commission_accepted', 'تم قبول سياسة العمولة', f'تم قبول عمولة المنصة بنسبة {terms.commission_rate}%.')
+        messages.success(request, 'تم حفظ موافقتك على سياسة العمولة.')
+    return redirect('accounts:provider_profile_edit')
+
+
+def _sync_provider_wallets(request, profile):
+    selected_ids = set(request.POST.getlist('wallets'))
+    active_wallets = Wallet.objects.filter(is_active=True)
+    active_ids = {str(wallet.pk) for wallet in active_wallets}
+    invalid_ids = selected_ids - active_ids
+    if invalid_ids:
+        raise ValidationError('تم اختيار محفظة غير نشطة أو غير موجودة.')
+    for wallet in active_wallets:
+        account_number = request.POST.get(f'wallet_account_{wallet.pk}', '').strip()
+        selected = str(wallet.pk) in selected_ids
+        if selected and not account_number:
+            raise ValidationError(f'رقم الحساب مطلوب لمحفظة {wallet.name}.')
+        if selected:
+            wallet_account, _ = ProviderWallet.objects.update_or_create(provider=profile, wallet=wallet, defaults={'account_number': account_number, 'is_active': True})
+            wallet_account.full_clean()
+            wallet_account.save()
+        else:
+            ProviderWallet.objects.filter(provider=profile, wallet=wallet).update(is_active=False)
+
 @login_required
 def provider_documents_view(request):
     if not request.user.is_provider():
@@ -237,6 +304,10 @@ def provider_submit_review(request):
     profile = services.get_provider_profile(request.user)
     if request.method == 'POST':
         checklist, can_submit = get_provider_onboarding_status(profile)
+        terms = active_terms()
+        if not terms or not TermsAcceptance.objects.filter(user=request.user, terms=terms).exists():
+            messages.error(request, 'يجب الموافقة على سياسة العمولة قبل إرسال الحساب للمراجعة.')
+            return redirect('accounts:provider_profile_edit')
         if not can_submit:
             missing = ', '.join([key for key, ok in checklist.items() if not ok])
             messages.error(request, f'لا يمكن إرسال طلب المراجعة. أكمل المتطلبات الناقصة: {missing}')
@@ -254,5 +325,14 @@ def provider_document_download(request, pk):
     if not document.can_be_viewed_by(request.user):
         messages.error(request, 'ليس لديك صلاحية لعرض هذا المستند.')
         return redirect('home')
-    from django.http import FileResponse
-    return FileResponse(document.file.open('rb'), as_attachment=True, filename=document.file.name.split('/')[-1])
+    from django.http import FileResponse, Http404
+    filename = Path(document.file.name).name
+    try:
+        if document.file.storage.exists(document.file.name):
+            return FileResponse(document.file.open('rb'), as_attachment=True, filename=filename)
+        legacy_path = Path(settings.MEDIA_ROOT) / document.file.name
+        if legacy_path.exists() and legacy_path.is_file():
+            return FileResponse(legacy_path.open('rb'), as_attachment=True, filename=filename)
+    except FileNotFoundError as exc:
+        raise Http404('المستند غير موجود في التخزين.') from exc
+    raise Http404('المستند غير موجود في التخزين.')

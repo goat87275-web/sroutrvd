@@ -10,6 +10,7 @@ app_name = 'accounts'
 urlpatterns = [
     path("provider/documents/", views.provider_documents_view, name="provider_documents"),
     path("provider/submit-review/", views.provider_submit_review, name="provider_submit_review"),
+    path("provider/accept-commission/", views.accept_commission_policy, name="accept_commission_policy"),
     path("provider/documents/<int:pk>/download/", views.provider_document_download, name="provider_document_download"),
     # التسجيل وتسجيل الدخول
     path('register/', views.register_view, name='register'),

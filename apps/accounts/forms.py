@@ -184,6 +184,10 @@ class ProviderProfileForm(forms.ModelForm):
     نموذج تعديل ملف مقدم الخدمة
     Provider profile edit form
     """
+    phone = forms.CharField(label='هاتف العمل', required=False, validators=[phone_validator], widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '77XXXXXXX', 'type': 'tel', 'inputmode': 'numeric'}))
+    latitude = forms.DecimalField(label='خط العرض', required=False, max_digits=9, decimal_places=6, min_value=-90, max_value=90, widget=forms.HiddenInput())
+    longitude = forms.DecimalField(label='خط الطول', required=False, max_digits=9, decimal_places=6, min_value=-180, max_value=180, widget=forms.HiddenInput())
+
     class Meta:
         model = ProviderProfile
         fields = ['business_name','display_name','bio','phone','email','profile_image','specialization','experience_years','qualifications','experience','hourly_rate','address','city','district','latitude','longitude','service_radius','availability','is_available']
@@ -193,6 +197,10 @@ class ProviderProfileForm(forms.ModelForm):
                 'rows': 4,
                 'placeholder': 'اكتب نبذة تعريفية عنك وعن خبراتك...'
             }),
+            'business_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'اسم النشاط التجاري'}),
+            'display_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'الاسم الظاهر للعملاء'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'هاتف العمل'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'business@example.com'}),
             'profile_image': forms.FileInput(attrs={'class': 'form-control'}),
             'specialization': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -224,14 +232,33 @@ class ProviderProfileForm(forms.ModelForm):
             'is_available': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
         labels = {
+            'business_name': 'اسم النشاط',
+            'display_name': 'اسم العرض',
+            'phone': 'هاتف العمل',
+            'email': 'بريد العمل',
             'bio': 'نبذة تعريفية',
             'profile_image': 'صورة الملف الشخصي',
             'specialization': 'التخصص',
             'experience_years': 'سنوات الخبرة',
             'hourly_rate': 'السعر بالساعة (ريال يمني)',
+            'qualifications': 'المؤهلات',
+            'experience': 'الخبرات',
             'address': 'العنوان',
+            'city': 'مدينة العمل',
+            'district': 'المنطقة / الحي',
+            'service_radius': 'نطاق الخدمة (كم)',
+            'availability': 'التوفر',
             'is_available': 'متاح لطلبات جديدة',
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        latitude = cleaned_data.get('latitude')
+        longitude = cleaned_data.get('longitude')
+        if (latitude is None) ^ (longitude is None):
+            raise ValidationError('يجب تحديد خط العرض وخط الطول معًا أو تركهما فارغين.')
+        return cleaned_data
+
 class ProviderDocumentForm(forms.ModelForm):
     class Meta:
         model = ProviderDocument

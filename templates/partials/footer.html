@@ -1,127 +1,132 @@
 <!-- تذييل الصفحة الاحترافي -->
 <footer class="footer">
-    <div class="container">
-        <div class="row g-4">
-            <!-- معلومات المنصة -->
-            <div class="col-lg-4 col-md-6">
-                <h5 class="fw-bold mb-3">
-                    <i class="bi bi-stars ms-2"></i>
-                    منصة سوق الخدمات
-                </h5>
-                <p class="text-white-50 mb-3">
-                    منصة موثوقة لربط مقدمي الخدمات المحترفين مع العملاء في مختلف المجالات. نوفر تجربة آمنة وسهلة للجميع.
-                </p>
-                <div class="social-links">
-                    <a href="#" aria-label="Facebook">
-                        <i class="bi bi-facebook"></i>
-                    </a>
-                    <a href="#" aria-label="Twitter">
-                        <i class="bi bi-twitter"></i>
-                    </a>
-                    <a href="#" aria-label="Instagram">
-                        <i class="bi bi-instagram"></i>
-                    </a>
-                    <a href="#" aria-label="LinkedIn">
-                        <i class="bi bi-linkedin"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- روابط سريعة -->
-            <div class="col-lg-2 col-md-6">
-                <h5 class="fw-bold mb-3">روابط سريعة</h5>
-                <ul class="list-unstyled">
-                    <li class="mb-2">
-                        <a href="{% url 'home' %}">
-                            <i class="bi bi-chevron-left ms-1"></i>
-                            الرئيسية
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="{% url 'marketplace:service_list' %}">
-                            <i class="bi bi-chevron-left ms-1"></i>
-                            الخدمات
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="{% url 'marketplace:category_list' %}">
-                            <i class="bi bi-chevron-left ms-1"></i>
-                            التصنيفات
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="#">
-                            <i class="bi bi-chevron-left ms-1"></i>
-                            من نحن
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- خدمات -->
-            <div class="col-lg-3 col-md-6">
-                <h5 class="fw-bold mb-3">الخدمات</h5>
-                <ul class="list-unstyled">
-                    <li class="mb-2">
-                        <a href="#">
-                            <i class="bi bi-chevron-left ms-1"></i>
-                            للعملاء
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="#">
-                            <i class="bi bi-chevron-left ms-1"></i>
-                            لمقدمي الخدمات
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="#">
-                            <i class="bi bi-chevron-left ms-1"></i>
-                            الأسئلة الشائعة
-                        </a>
-                    </li>
-                    <li class="mb-2">
-                        <a href="#">
-                            <i class="bi bi-chevron-left ms-1"></i>
-                            الدعم الفني
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- تواصل معنا -->
-            <div class="col-lg-3 col-md-6">
-                <h5 class="fw-bold mb-3">تواصل معنا</h5>
-                <ul class="list-unstyled">
-                    <li class="mb-2 d-flex align-items-start">
-                        <i class="bi bi-envelope ms-2 mt-1"></i>
-                        <span>info@servicemarketplace.com</span>
-                    </li>
-                    <li class="mb-2 d-flex align-items-start">
-                        <i class="bi bi-phone ms-2 mt-1"></i>
-                        <span>+966 XX XXX XXXX</span>
-                    </li>
-                    <li class="mb-2 d-flex align-items-start">
-                        <i class="bi bi-geo-alt ms-2 mt-1"></i>
-                        <span>المملكة العربية السعودية</span>
-                    </li>
-                </ul>
-            </div>
+  <div class="container">
+    <div class="row g-4">
+      <!-- معلومات المنصة -->
+      <div class="col-lg-4 col-md-6">
+        <h5 class="fw-bold mb-3">
+          <i class="bi bi-stars ms-2"></i>
+          منصة سوق الخدمات
+        </h5>
+        <p class="text-white-50 mb-3">
+          منصة موثوقة لربط مقدمي الخدمات المحترفين مع العملاء في مختلف المجالات.
+          نوفر تجربة آمنة وسهلة للجميع.
+        </p>
+        <div class="social-links">
+          <a href="#" aria-label="Facebook">
+            <i class="bi bi-facebook"></i>
+          </a>
+          <a href="#" aria-label="Twitter">
+            <i class="bi bi-twitter"></i>
+          </a>
+          <a href="#" aria-label="Instagram">
+            <i class="bi bi-instagram"></i>
+          </a>
+          <a href="#" aria-label="LinkedIn">
+            <i class="bi bi-linkedin"></i>
+          </a>
         </div>
+      </div>
 
-        <!-- حقوق النشر -->
-        <hr class="my-4" style="border-color: rgba(255, 255, 255, 0.1);">
+      <!-- روابط سريعة -->
+      <div class="col-lg-2 col-md-6">
+        <h5 class="fw-bold mb-3">روابط سريعة</h5>
+        <ul class="list-unstyled">
+          <li class="mb-2">
+            <a href="{% url 'home' %}">
+              <i class="bi bi-chevron-left ms-1"></i>
+              الرئيسية
+            </a>
+          </li>
+          <li class="mb-2">
+            <a href="{% url 'marketplace:service_list' %}">
+              <i class="bi bi-chevron-left ms-1"></i>
+              الخدمات
+            </a>
+          </li>
+          <li class="mb-2">
+            <a href="{% url 'marketplace:category_list' %}">
+              <i class="bi bi-chevron-left ms-1"></i>
+              التصنيفات
+            </a>
+          </li>
+          <li class="mb-2">
+            <a href="#">
+              <i class="bi bi-chevron-left ms-1"></i>
+              من نحن
+            </a>
+          </li>
+        </ul>
+      </div>
 
-        <div class="row">
-            <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                <p class="text-white-50 small mb-0">
-                    &copy; 2026 منصة سوق الخدمات. جميع الحقوق محفوظة.
-                </p>
-            </div>
-            <div class="col-md-6 text-center text-md-end">
-                <a href="#" class="text-white-50 small text-decoration-none me-3">سياسة الخصوصية</a>
-                <a href="#" class="text-white-50 small text-decoration-none">شروط الاستخدام</a>
-            </div>
-        </div>
+      <!-- خدمات -->
+      <div class="col-lg-3 col-md-6">
+        <h5 class="fw-bold mb-3">الخدمات</h5>
+        <ul class="list-unstyled">
+          <li class="mb-2">
+            <a href="#">
+              <i class="bi bi-chevron-left ms-1"></i>
+              للعملاء
+            </a>
+          </li>
+          <li class="mb-2">
+            <a href="#">
+              <i class="bi bi-chevron-left ms-1"></i>
+              لمقدمي الخدمات
+            </a>
+          </li>
+          <li class="mb-2">
+            <a href="#">
+              <i class="bi bi-chevron-left ms-1"></i>
+              الأسئلة الشائعة
+            </a>
+          </li>
+          <li class="mb-2">
+            <a href="#">
+              <i class="bi bi-chevron-left ms-1"></i>
+              الدعم الفني
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- تواصل معنا -->
+      <div class="col-lg-3 col-md-6">
+        <h5 class="fw-bold mb-3">تواصل معنا</h5>
+        <ul class="list-unstyled">
+          <li class="mb-2 d-flex align-items-start">
+            <i class="bi bi-envelope ms-2 mt-1"></i>
+            <span>info@servicemarketplace.com</span>
+          </li>
+          <li class="mb-2 d-flex align-items-start">
+            <i class="bi bi-phone ms-2 mt-1"></i>
+            <span>+967 XX XXX XXXX</span>
+          </li>
+          <li class="mb-2 d-flex align-items-start">
+            <i class="bi bi-geo-alt ms-2 mt-1"></i>
+            <span>الجمهورية العربية اليمنية</span>
+          </li>
+        </ul>
+      </div>
     </div>
+
+    <!-- حقوق النشر -->
+    <hr class="my-4" style="border-color: rgba(255, 255, 255, 0.1)" />
+
+    <div class="row">
+      <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+        <p class="text-white-50 small mb-0">
+          &copy; 2026 منصة سوق الخدمات. جميع الحقوق محفوظة.
+        </p>
+      </div>
+      <div class="col-md-6 text-center text-md-end">
+        <a href="#" class="text-white-50 small text-decoration-none me-3"
+          >سياسة الخصوصية</a
+        >
+        <a href="#" class="text-white-50 small text-decoration-none"
+          >شروط الاستخدام</a
+        >
+      </div>
+    </div>
+  </div>
 </footer>

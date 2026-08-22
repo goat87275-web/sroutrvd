@@ -2,26 +2,40 @@
 {% block title %}دفع الطلب {{ payment.order.order_number }}{% endblock %}
 {% block content %}
 <div class="container py-4">
-  <div class="card shadow-sm">
-    <div class="card-header bg-primary text-white"><h1 class="h4 mb-0">صفحة الدفع</h1></div>
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white"><h1 class="h4 mb-0">الدفع اليدوي عبر المحافظ</h1></div>
     <div class="card-body">
       <dl class="row">
         <dt class="col-sm-3">رقم الطلب</dt><dd class="col-sm-9">{{ payment.order.order_number }}</dd>
+        <dt class="col-sm-3">العميل</dt><dd class="col-sm-9">{{ payment.order.customer.username }}</dd>
         <dt class="col-sm-3">الخدمة</dt><dd class="col-sm-9">{{ payment.order.service.title }}</dd>
-        <dt class="col-sm-3">مقدم الخدمة</dt><dd class="col-sm-9">{{ payment.order.provider.username }}</dd>
-        <dt class="col-sm-3">المبلغ</dt><dd class="col-sm-9">{{ payment.amount }} {{ payment.currency }}</dd>
+        <dt class="col-sm-3">المحفظة</dt><dd class="col-sm-9"><span style="color: {{ payment.provider_wallet.wallet.color }}">●</span> {{ payment.provider_wallet.wallet.name }}</dd>
+        <dt class="col-sm-3">رقم حساب مقدم الخدمة</dt><dd class="col-sm-9">{{ payment.provider_wallet_account_snapshot }}</dd>
+        <dt class="col-sm-3">مبلغ الطلب</dt><dd class="col-sm-9">{{ payment.amount }} {{ payment.currency }}</dd>
+        <dt class="col-sm-3">عمولة المنصة</dt><dd class="col-sm-9">{{ payment.commission_rate }}% = {{ payment.commission_amount }}</dd>
+        <dt class="col-sm-3">صافي مقدم الخدمة</dt><dd class="col-sm-9">{{ payment.provider_net_amount }}</dd>
         <dt class="col-sm-3">حالة الدفع</dt><dd class="col-sm-9"><span class="badge bg-secondary">{{ payment.get_status_display }}</span></dd>
-        <dt class="col-sm-3">طريقة الدفع</dt><dd class="col-sm-9">{{ payment.payment_method }} / {{ payment.gateway }}</dd>
-        <dt class="col-sm-3">Transaction ID</dt><dd class="col-sm-9">{{ payment.transaction_id }}</dd>
       </dl>
-      <div class="alert alert-warning">Payment infrastructure implemented. External gateway credentials are required for a real electronic provider.</div>
-      {% if debug_payment_actions and payment.status != 'paid' %}
-      <div class="d-flex gap-2">
-        <form method="post" action="{% url 'payments:payment_test_success' payment.pk %}">{% csrf_token %}<button class="btn btn-success">تأكيد دفع تجريبي</button></form>
-        <form method="post" action="{% url 'payments:payment_test_fail' payment.pk %}">{% csrf_token %}<button class="btn btn-outline-danger">فشل دفع تجريبي</button></form>
-      </div>
-      {% endif %}
+      <div class="alert alert-info">حوّل المبلغ خارج النظام إلى رقم حساب مقدم الخدمة ثم ارفع سند الحوالة. رفع السند لا يعني نجاح الدفع حتى يراجعه مقدم الخدمة.</div>
     </div>
   </div>
+  {% if user == payment.order.customer and payment.status != 'paid' %}
+  <form method="post" enctype="multipart/form-data" action="{% url 'payments:payment_submit_proof' payment.pk %}" class="card card-body shadow-sm mb-4">
+    {% csrf_token %}
+    {{ proof_form.as_p }}
+    <button class="btn btn-primary">رفع سند الحوالة</button>
+  </form>
+  {% endif %}
+  {% if payment.proof_file %}
+  <div class="card shadow-sm mb-4"><div class="card-body"><h5>سند الحوالة</h5><a href="{{ payment.proof_file.url }}" target="_blank">فتح السند</a><p class="text-muted">{{ payment.proof_uploaded_at|date:'Y-m-d H:i' }}</p></div></div>
+  {% endif %}
+  {% if user == payment.order.provider and payment.status == 'under_review' %}
+  <div class="card card-body shadow-sm">
+    <div class="d-flex gap-2 flex-wrap">
+      <form method="post" action="{% url 'payments:payment_approve' payment.pk %}">{% csrf_token %}<button class="btn btn-success">الموافقة على الدفع</button></form>
+      <form method="post" action="{% url 'payments:payment_reject' payment.pk %}" class="d-flex gap-2">{% csrf_token %}{{ reject_form.reason }}<button class="btn btn-danger">رفض الدفع</button></form>
+    </div>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

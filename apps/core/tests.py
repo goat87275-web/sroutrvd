@@ -6,3 +6,8 @@ class CommissionCalculationTests(TestCase):
         result=calculate_commission(Decimal('100.00'), Decimal('10.00'))
         self.assertEqual(result['commission_amount'], Decimal('10.00'))
         self.assertEqual(result['provider_net_amount'], Decimal('90.00'))
+from django.conf import settings
+
+class MapsSettingsTests(TestCase):
+    def test_maps_api_key_setting_exists(self):
+        self.assertTrue(hasattr(settings, 'MAPS_API_KEY'))

@@ -78,6 +78,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'apps.core.context_processors.maps_settings',
             ],
         },
     },
@@ -143,6 +144,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 PRIVATE_MEDIA_ROOT = BASE_DIR / 'private_media'
 MAX_PROVIDER_DOCUMENT_SIZE = 5 * 1024 * 1024
+MAX_PAYMENT_PROOF_SIZE = 5 * 1024 * 1024
+MAPS_API_KEY = config('MAPS_API_KEY', default='')
 
 
 # إعدادات Crispy Forms

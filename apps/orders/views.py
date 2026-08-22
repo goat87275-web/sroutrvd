@@ -107,6 +107,9 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
         
         # التسليمات
         context['deliveries'] = order.deliveries.all()
+        from apps.payments.models import ProviderWallet, Payment
+        context['provider_wallets'] = ProviderWallet.objects.filter(provider=order.provider.provider_profile, is_active=True, wallet__is_active=True).select_related('wallet')
+        context['latest_payment'] = Payment.objects.filter(order=order).select_related('provider_wallet','provider_wallet__wallet').order_by('-created_at').first()
         
         return context
 
@@ -238,6 +241,10 @@ def order_start(request, order_number):
         messages.error(request, 'ليس لديك صلاحية لهذا الإجراء.')
         return redirect('orders:order_detail', order_number=order_number)
     
+    if order.payment_status != 'paid':
+        messages.error(request, 'لا يمكن بدء العمل قبل تأكيد الدفع.')
+        return redirect('orders:order_detail', order_number=order_number)
+
     if not order.can_be_started():
         messages.error(request, 'لا يمكن بدء العمل على هذا الطلب.')
         return redirect('orders:order_detail', order_number=order_number)

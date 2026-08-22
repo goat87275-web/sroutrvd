@@ -1,292 +1,207 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
 {% block title %}تعديل ملف مقدم الخدمة - منصة سوق الخدمات{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <!-- العنوان -->
-            <div class="text-center mb-4">
-                <h2 class="fw-bold">
-                    <i class="bi bi-pencil-square ms-2"></i>
-                    تعديل ملف مقدم الخدمة
-                </h2>
-                <p class="text-muted">قم بتحديث معلوماتك لتظهر للعملاء</p>
-            </div>
-
-            <form method="post" enctype="multipart/form-data" class="loading-form">
-                {% csrf_token %}
-
-                <!-- المعلومات الأساسية -->
-                <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-header bg-primary text-white py-3">
-                        <h5 class="mb-0">
-                            <i class="bi bi-person-circle ms-2"></i>
-                            المعلومات الأساسية
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">الاسم الأول</label>
-                                {{ user_form.first_name }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">اسم العائلة</label>
-                                {{ user_form.last_name }}
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">البريد الإلكتروني</label>
-                            {{ user_form.email }}
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">رقم الجوال</label>
-                                {{ user_form.phone }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">المدينة</label>
-                                {{ user_form.city }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- معلومات العمل -->
-                <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-header bg-success text-white py-3">
-                        <h5 class="mb-0">
-                            <i class="bi bi-briefcase ms-2"></i>
-                            معلومات العمل
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <!-- الصورة الشخصية -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">
-                                <i class="bi bi-image ms-2"></i>
-                                صورة الملف الشخصي
-                            </label>
-
-                            {% if profile.profile_image %}
-                            <div class="mb-2">
-                                <img src="{{ profile.profile_image.url }}" alt="Profile" class="rounded"
-                                    style="max-width: 150px; max-height: 150px;">
-                            </div>
-                            {% endif %}
-
-                            {{ provider_form.profile_image }}
-                            <small class="form-text text-muted d-block mt-1">
-                                صورة واضحة ومهنية تساعد في جذب العملاء
-                            </small>
-                        </div>
-
-                        <!-- النبذة التعريفية -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">
-                                <i class="bi bi-card-text ms-2"></i>
-                                نبذة تعريفية
-                            </label>
-                            {{ provider_form.bio }}
-                            <small class="form-text text-muted">
-                                اكتب نبذة مختصرة عن خبراتك ومهاراتك (حتى 500 حرف)
-                            </small>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-tag ms-2"></i>
-                                    التخصص
-                                </label>
-                                {{ provider_form.specialization }}
-                                <small class="form-text text-muted">
-                                    مثال: تصميم جرافيك، برمجة ويب، تسويق
-                                </small>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-calendar3 ms-2"></i>
-                                    سنوات الخبرة
-                                </label>
-                                {{ provider_form.experience_years }}
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">المؤهلات</label>
-                                {{ provider_form.qualifications }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">الخبرات</label>
-                                {{ provider_form.experience }}
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">
-                                <i class="bi bi-cash-coin ms-2"></i>
-                                السعر بالساعة (ريال يمني)
-                            </label>
-                            {{ provider_form.hourly_rate }}
-                            <small class="form-text text-muted">
-                                اترك فارغاً إذا كنت تفضل التفاوض مع كل عميل
-                            </small>
-                        </div>
-
-                        <!-- الحالة -->
-                        <div class="form-check form-switch">
-                            {{ provider_form.is_available }}
-                            <label class="form-check-label fw-bold" for="{{ provider_form.is_available.id_for_label }}">
-                                متاح لطلبات جديدة
-                            </label>
-                            <small class="form-text text-muted d-block">
-                                إذا كنت غير متاح حالياً، لن تصلك طلبات جديدة
-                            </small>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- الموقع الجغرافي -->
-                <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-header bg-info text-white py-3">
-                        <h5 class="mb-0">
-                            <i class="bi bi-geo-alt ms-2"></i>
-                            الموقع الجغرافي
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">العنوان التفصيلي</label>
-                            {{ provider_form.address }}
-                            <small class="form-text text-muted">
-                                العنوان يساعد العملاء في العثور عليك
-                            </small>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">المدينة</label>
-                                {{ provider_form.city }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">الحي / المنطقة</label>
-                                {{ provider_form.district }}
-                            </div>
-                        </div>
-                        {{ provider_form.latitude }}
-                        {{ provider_form.longitude }}
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">نطاق الخدمة (كم)</label>
-                                {{ provider_form.service_radius }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">التوفر</label>
-                                {{ provider_form.availability }}
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">حدد موقعك على الخريطة</label>
-                            <div id="provider-location-map" style="height: 380px; border-radius: 12px; border: 1px solid #ddd;"></div>
-                            <small class="form-text text-muted">انقر على الخريطة أو حرّك المؤشر ثم اضغط حفظ التغييرات. الإحداثيات تحفظ في قاعدة البيانات.</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-header bg-warning text-dark py-3">
-                        <h5 class="mb-0"><i class="bi bi-list-check ms-2"></i>Checklist قبل إرسال الحساب للمراجعة</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-2">
-                            {% for key, ok in verification_checklist.items %}
-                            <div class="col-md-4"><span class="badge {% if ok %}bg-success{% else %}bg-danger{% endif %} w-100 py-2">{% if ok %}✓{% else %}✗{% endif %} {{ key }}</span></div>
-                            {% endfor %}
-                        </div>
-                        <div class="mt-3 d-flex gap-2 flex-wrap">
-                            <a href="{% url 'accounts:provider_documents' %}" class="btn btn-outline-primary"><i class="bi bi-upload ms-2"></i>رفع ملف / إدارة المستندات</a>
-                            <form method="post" action="{% url 'accounts:provider_submit_review' %}">{% csrf_token %}
-                                <button class="btn btn-success" {% if not can_submit_for_review %}disabled{% endif %}>إرسال للمراجعة</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- الإحصائيات (للعرض فقط) -->
-                <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-header bg-secondary text-white py-3">
-                        <h5 class="mb-0">
-                            <i class="bi bi-graph-up ms-2"></i>
-                            الإحصائيات
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row text-center">
-                            <div class="col-md-4 mb-3">
-                                <div class="p-3 bg-light rounded">
-                                    <h3 class="text-primary mb-0">{{ profile.total_orders }}</h3>
-                                    <p class="text-muted small mb-0">إجمالي الطلبات</p>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="p-3 bg-light rounded">
-                                    <h3 class="text-success mb-0">{{ profile.completed_orders }}</h3>
-                                    <p class="text-muted small mb-0">الطلبات المكتملة</p>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="p-3 bg-light rounded">
-                                    <h3 class="text-warning mb-0">
-                                        <i class="bi bi-star-fill"></i>
-                                        {{ profile.average_rating }}
-                                    </h3>
-                                    <p class="text-muted small mb-0">متوسط التقييم</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- أزرار الحفظ -->
-                <div class="d-flex gap-2 justify-content-end">
-                    <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">
-                        <i class="bi bi-x-circle ms-2"></i>
-                        إلغاء
-                    </a>
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="bi bi-check-circle ms-2"></i>
-                        حفظ التغييرات
-                    </button>
-                </div>
-            </form>
+<div class="container py-5 provider-edit-page">
+  <div class="row justify-content-center">
+    <div class="col-xl-11">
+      <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+        <div>
+          <h2 class="fw-bold mb-1"><i class="bi bi-pencil-square ms-2"></i>تعديل ملف مقدم الخدمة</h2>
+          <p class="text-muted mb-0">تُحفظ البيانات في ملفك المرتبط بحسابك الحالي وتظهر للإدارة والعملاء بعد الحفظ.</p>
         </div>
+        <span class="badge fs-6 {% if profile.verification_status == 'verified' %}bg-success{% elif profile.verification_status == 'suspended' %}bg-danger{% elif profile.verification_status == 'pending_review' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+          {{ profile.get_verification_status_display }}
+        </span>
+      </div>
+
+      {% if user_form.errors or provider_form.errors %}
+      <div class="alert alert-danger">
+        <strong>لم يتم حفظ البيانات.</strong> يرجى مراجعة الأخطاء الظاهرة أسفل الحقول.
+        {{ user_form.non_field_errors }}{{ provider_form.non_field_errors }}
+      </div>
+      {% endif %}
+
+      <form id="provider-edit-form" method="post" enctype="multipart/form-data" class="loading-form" novalidate>
+        {% csrf_token %}
+
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-primary text-white py-3"><h5 class="mb-0"><i class="bi bi-person-circle ms-2"></i>1. المعلومات الأساسية</h5></div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6">{{ user_form.first_name|as_crispy_field }}</div>
+              <div class="col-md-6">{{ user_form.last_name|as_crispy_field }}</div>
+              <div class="col-md-6">{{ user_form.email|as_crispy_field }}</div>
+              <div class="col-md-6">{{ user_form.phone|as_crispy_field }}</div>
+              <div class="col-md-6">{{ provider_form.email|as_crispy_field }}</div>
+              <div class="col-md-6">{{ provider_form.phone|as_crispy_field }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-success text-white py-3"><h5 class="mb-0"><i class="bi bi-briefcase ms-2"></i>2. معلومات النشاط/المهنة</h5></div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6">{{ provider_form.display_name|as_crispy_field }}</div>
+              <div class="col-md-6">{{ provider_form.business_name|as_crispy_field }}</div>
+              <div class="col-md-6">{{ provider_form.specialization|as_crispy_field }}</div>
+              <div class="col-md-6">{{ provider_form.hourly_rate|as_crispy_field }}</div>
+              <div class="col-12">
+                {% if profile.profile_image %}<div class="mb-2"><img src="{{ profile.profile_image.url }}" alt="Profile" class="rounded border" style="max-width:150px;max-height:150px;object-fit:cover;"></div>{% endif %}
+                {{ provider_form.profile_image|as_crispy_field }}
+              </div>
+              <div class="col-12">{{ provider_form.bio|as_crispy_field }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-dark text-white py-3"><h5 class="mb-0"><i class="bi bi-award ms-2"></i>3. الخبرة والمؤهلات</h5></div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-4">{{ provider_form.experience_years|as_crispy_field }}</div>
+              <div class="col-md-4">{{ provider_form.service_radius|as_crispy_field }}</div>
+              <div class="col-md-4">{{ provider_form.availability|as_crispy_field }}</div>
+              <div class="col-md-6">{{ provider_form.qualifications|as_crispy_field }}</div>
+              <div class="col-md-6">{{ provider_form.experience|as_crispy_field }}</div>
+              <div class="col-12 form-check form-switch ps-0">{{ provider_form.is_available|as_crispy_field }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-info text-white py-3"><h5 class="mb-0"><i class="bi bi-geo-alt ms-2"></i>4. الموقع والخريطة</h5></div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6">{{ user_form.city|as_crispy_field }}</div>
+              <div class="col-md-6">{{ provider_form.city|as_crispy_field }}</div>
+              <div class="col-md-6">{{ provider_form.district|as_crispy_field }}</div>
+              <div class="col-12">{{ provider_form.address|as_crispy_field }}</div>
+            </div>
+            {{ provider_form.latitude }}{{ provider_form.longitude }}
+            <div class="row g-3 mt-1">
+              <div class="col-md-6"><label class="form-label fw-bold">Latitude</label><input id="latitude-display" type="text" class="form-control" value="{{ profile.latitude|default_if_none:'' }}" readonly></div>
+              <div class="col-md-6"><label class="form-label fw-bold">Longitude</label><input id="longitude-display" type="text" class="form-control" value="{{ profile.longitude|default_if_none:'' }}" readonly></div>
+            </div>
+            <div class="mt-3">
+              <label class="form-label fw-bold">حدد موقعك على الخريطة</label>
+              {% if not maps_api_key %}
+              <div class="alert alert-warning">يرجى إعداد مفتاح الخرائط في ملف البيئة MAPS_API_KEY. ستعمل خريطة OpenStreetMap الحالية بدون مفتاح، وسيصبح تكامل مزود الخرائط الخارجي جاهزًا عند إضافة المفتاح.</div>
+              {% endif %}
+              <div id="provider-location-map" class="provider-map" data-api-key="{{ maps_api_key }}" data-lat="{{ profile.latitude|default_if_none:'' }}" data-lng="{{ profile.longitude|default_if_none:'' }}"></div>
+              <small class="form-text text-muted">انقر على الخريطة أو حرّك المؤشر. تُرسل الإحداثيات مع النموذج وتحفظ في قاعدة البيانات عند الضغط على حفظ التغييرات.</small>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-light py-3"><h5 class="mb-0"><i class="bi bi-percent ms-2"></i>5. سياسة العمولة والمحافظ الإلكترونية</h5></div>
+          <div class="card-body">
+            <div class="alert alert-info">
+              {% if terms %}<strong>عمولة المنصة: {{ terms.commission_rate }}%</strong><br>
+              مثال: قيمة الطلب 100، عمولة المنصة {{ terms.commission_rate }}%، صافي مقدم الخدمة = 100 - العمولة.{% else %}<strong>لا توجد سياسة عمولة فعالة بعد.</strong><br>يرجى انتظار الإدارة لإعداد نسبة العمولة من لوحة التحكم.{% endif %}
+            </div>
+            {% if accepted_terms %}
+              <p class="text-success"><i class="bi bi-check-circle"></i> وافقت على هذه السياسة بتاريخ {{ accepted_terms.accepted_at|date:'Y-m-d H:i' }} بنسبة {{ accepted_terms.commission_rate }}%.</p>
+            {% elif terms %}
+              <p class="text-danger">يجب الموافقة على سياسة العمولة قبل إرسال الحساب للمراجعة.</p>
+              <button form="commission-accept-form" class="btn btn-success"><i class="bi bi-check2-square ms-2"></i>أوافق على سياسة العمولة</button>
+            {% else %}
+              <button class="btn btn-secondary" disabled>بانتظار إعداد سياسة العمولة</button>
+            {% endif %}
+            <hr>
+            <h6 class="fw-bold">محافظ استقبال المدفوعات</h6>
+            {% for wallet, provider_wallet in wallet_rows %}
+            <div class="border rounded p-3 mb-2" style="border-right: 6px solid {{ wallet.color }} !important;">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="wallets" value="{{ wallet.pk }}" id="wallet_{{ wallet.pk }}" {% if provider_wallet and provider_wallet.is_active %}checked{% endif %}>
+                <label class="form-check-label fw-bold" for="wallet_{{ wallet.pk }}"><span style="color: {{ wallet.color }}">●</span> {{ wallet.name }}</label>
+              </div>
+              <label class="form-label mt-2" for="wallet_account_{{ wallet.pk }}">رقم الحساب</label>
+              <input class="form-control" id="wallet_account_{{ wallet.pk }}" name="wallet_account_{{ wallet.pk }}" value="{% if provider_wallet %}{{ provider_wallet.account_number }}{% endif %}" placeholder="777XXXXXX">
+            </div>
+            {% empty %}<p class="text-muted">لا توجد محافظ نشطة حاليًا. يمكن للإدارة إضافتها من لوحة التحكم.</p>{% endfor %}
+          </div>
+        </div>
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-warning text-dark py-3"><h5 class="mb-0"><i class="bi bi-file-earmark-lock ms-2"></i>6. المستندات وحالة التحقق</h5></div>
+          <div class="card-body">
+            <div class="row g-2 mb-3">
+              {% for key, ok in verification_checklist.items %}
+              <div class="col-md-4"><span class="badge {% if ok %}bg-success{% else %}bg-danger{% endif %} w-100 py-2">{% if ok %}✓{% else %}✗{% endif %} {{ key }}</span></div>
+              {% endfor %}
+            </div>
+            <a href="{% url 'accounts:provider_documents' %}" class="btn btn-outline-primary"><i class="bi bi-upload ms-2"></i>رفع ملف / إدارة المستندات</a>
+          </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-secondary text-white py-3"><h5 class="mb-0"><i class="bi bi-graph-up ms-2"></i>6. الإحصائيات</h5></div>
+          <div class="card-body"><div class="row text-center g-3"><div class="col-md-4"><div class="p-3 bg-light rounded"><h3 class="text-primary mb-0">{{ profile.total_orders }}</h3><p class="text-muted small mb-0">إجمالي الطلبات</p></div></div><div class="col-md-4"><div class="p-3 bg-light rounded"><h3 class="text-success mb-0">{{ profile.completed_orders }}</h3><p class="text-muted small mb-0">الطلبات المكتملة</p></div></div><div class="col-md-4"><div class="p-3 bg-light rounded"><h3 class="text-warning mb-0"><i class="bi bi-star-fill"></i> {{ profile.average_rating }}</h3><p class="text-muted small mb-0">متوسط التقييم</p></div></div></div></div>
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end mb-3">
+          <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary"><i class="bi bi-x-circle ms-2"></i>إلغاء</a>
+          <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-check-circle ms-2"></i>حفظ التغييرات</button>
+        </div>
+      </form>
+
+      <form id="commission-accept-form" method="post" action="{% url 'accounts:accept_commission_policy' %}" class="d-none">{% csrf_token %}</form>
+      <form method="post" action="{% url 'accounts:provider_submit_review' %}" class="text-end">
+        {% csrf_token %}
+        <button class="btn btn-success" {% if not can_submit_for_review %}disabled{% endif %}><i class="bi bi-send-check ms-2"></i>إرسال الحساب للمراجعة</button>
+      </form>
     </div>
+  </div>
 </div>
 {% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQd+MxzeIWr4cYhDTmPHuAHpKf0U0oA=" crossorigin="" />
+<style>.provider-map{height:420px;min-height:420px;width:100%;border-radius:12px;border:1px solid #ddd;overflow:hidden}.leaflet-container{direction:ltr}</style>
 {% endblock %}
+
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 (function(){
-  const latInput = document.getElementById('id_latitude');
-  const lngInput = document.getElementById('id_longitude');
-  const initialLat = parseFloat(latInput.value) || 15.3694;
-  const initialLng = parseFloat(lngInput.value) || 44.1910;
-  const map = L.map('provider-location-map').setView([initialLat, initialLng], latInput.value && lngInput.value ? 13 : 6);
+  const configuredMapsKey = document.getElementById('provider-location-map')?.dataset.apiKey || '';
+  const mapEl = document.getElementById('provider-location-map');
+  const latInput = document.getElementById('id_provider-latitude');
+  const lngInput = document.getElementById('id_provider-longitude');
+  const latDisplay = document.getElementById('latitude-display');
+  const lngDisplay = document.getElementById('longitude-display');
+  if (!mapEl || !latInput || !lngInput || typeof L === 'undefined') return;
+  const savedLat = parseFloat(mapEl.dataset.lat || latInput.value);
+  const savedLng = parseFloat(mapEl.dataset.lng || lngInput.value);
+  const hasSavedLocation = Number.isFinite(savedLat) && Number.isFinite(savedLng);
+  const startLat = hasSavedLocation ? savedLat : 15.3694;
+  const startLng = hasSavedLocation ? savedLng : 44.1910;
+  const map = L.map(mapEl).setView([startLat, startLng], hasSavedLocation ? 13 : 6);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'}).addTo(map);
-  const marker = L.marker([initialLat, initialLng], {draggable: true}).addTo(map);
-  function updateInputs(latlng){latInput.value = latlng.lat.toFixed(6); lngInput.value = latlng.lng.toFixed(6);}
-  marker.on('dragend', function(e){updateInputs(e.target.getLatLng());});
-  map.on('click', function(e){marker.setLatLng(e.latlng); updateInputs(e.latlng);});
+  let marker = null;
+  function updateFields(latlng) {
+    latInput.value = latlng.lat.toFixed(6);
+    lngInput.value = latlng.lng.toFixed(6);
+    latDisplay.value = latInput.value;
+    lngDisplay.value = lngInput.value;
+  }
+  function placeMarker(latlng) {
+    if (!marker) {
+      marker = L.marker(latlng, {draggable: true}).addTo(map);
+      marker.on('dragend', function(e){ updateFields(e.target.getLatLng()); });
+    } else {
+      marker.setLatLng(latlng);
+    }
+    updateFields(latlng);
+  }
+  if (hasSavedLocation) placeMarker({lat: savedLat, lng: savedLng});
+  map.on('click', function(e){ placeMarker(e.latlng); });
+  setTimeout(function(){ map.invalidateSize(); }, 250);
 })();
 </script>
 {% endblock %}

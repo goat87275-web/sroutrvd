@@ -116,8 +116,18 @@
                     {% if user == order.customer and order.status == 'payment_pending' %}
                     <form method="post" action="{% url 'payments:payment_create' order.order_number %}" class="mb-2">
                         {% csrf_token %}
-                        <button class="btn btn-primary w-100"><i class="bi bi-credit-card"></i> الدفع الآن</button>
+                        <label class="form-label fw-bold">اختر محفظة مقدم الخدمة</label>
+                        {% for provider_wallet in provider_wallets %}
+                        <div class="form-check border rounded p-2 mb-2" style="border-right: 5px solid {{ provider_wallet.wallet.color }} !important;">
+                            <input class="form-check-input" type="radio" name="provider_wallet" id="provider_wallet_{{ provider_wallet.pk }}" value="{{ provider_wallet.pk }}" required>
+                            <label class="form-check-label" for="provider_wallet_{{ provider_wallet.pk }}"><span style="color: {{ provider_wallet.wallet.color }}">●</span> {{ provider_wallet.wallet.name }}<br><small>رقم الحساب: {{ provider_wallet.account_number }}</small></label>
+                        </div>
+                        {% empty %}<div class="alert alert-warning">لا توجد محافظ مفعلة لهذا المقدم.</div>{% endfor %}
+                        <button class="btn btn-primary w-100" {% if not provider_wallets %}disabled{% endif %}><i class="bi bi-credit-card"></i> الدفع الآن</button>
                     </form>
+                    {% endif %}
+                    {% if latest_payment %}
+                    <a class="btn btn-outline-primary w-100 mb-2" href="{% url 'payments:payment_detail' latest_payment.pk %}">تفاصيل الدفع / مراجعة السند</a>
                     {% endif %}
 
                     {% if user == order.customer and order.can_be_completed %}

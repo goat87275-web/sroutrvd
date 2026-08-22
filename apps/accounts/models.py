@@ -173,5 +173,5 @@ class ProviderDocument(models.Model):
         permissions=[('review_provider_document','Can review provider document'),('verify_provider','Can verify provider')]
         indexes=[models.Index(fields=['provider','status']), models.Index(fields=['document_type','status'])]
     def can_be_viewed_by(self, user):
-        return user.is_authenticated and (user == self.provider.user or user.has_perm('accounts.review_provider_document') or user.is_superuser)
+        return user.is_authenticated and (user == self.provider.user or user.is_staff or user.has_perm('accounts.review_provider_document') or user.is_superuser)
     def __str__(self): return f'{self.provider} - {self.document_type}'
