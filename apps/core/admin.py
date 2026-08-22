@@ -1,5 +1,11 @@
 from django.contrib import admin
-from .models import TermsAndConditions, TermsAcceptance, PlatformSetting, Notification, AuditLog
+from .models import TermsAndConditions, TermsAcceptance, PlatformSetting, Notification, AuditLog, City, District
+@admin.register(City)
+class CityAdmin(admin.ModelAdmin):
+    list_display=['name','is_active','order','created_at']; list_filter=['is_active']; search_fields=['name']; ordering=['order','name']
+@admin.register(District)
+class DistrictAdmin(admin.ModelAdmin):
+    list_display=['name','city','is_active','order','created_at']; list_filter=['is_active','city']; search_fields=['name','city__name']; list_select_related=['city']; ordering=['city','order','name']
 @admin.register(TermsAndConditions)
 class TermsAdmin(admin.ModelAdmin): list_display=['version','commission_rate','is_active','published_at','created_at']; list_filter=['is_active']; search_fields=['version','content']
 @admin.register(TermsAcceptance)

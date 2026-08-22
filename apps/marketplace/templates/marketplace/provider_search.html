@@ -8,8 +8,8 @@
       <div class="col-md-3"><input class="form-control" name="q" value="{{ request.GET.q }}" placeholder="بحث بالاسم أو الخدمة"></div>
       <div class="col-md-2"><select class="form-select" name="category"><option value="">كل التصنيفات</option>{% for category in categories %}<option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:'s' %}selected{% endif %}>{{ category.name }}</option>{% endfor %}</select></div>
       <div class="col-md-2"><select class="form-select" name="service"><option value="">كل الخدمات</option>{% for service in services %}<option value="{{ service.id }}" {% if request.GET.service == service.id|stringformat:'s' %}selected{% endif %}>{{ service.title }}</option>{% endfor %}</select></div>
-      <div class="col-md-2"><input class="form-control" name="city" value="{{ request.GET.city }}" placeholder="المدينة"></div>
-      <div class="col-md-2"><input class="form-control" name="district" value="{{ request.GET.district }}" placeholder="الحي"></div>
+      <div class="col-md-2"><select class="form-select" name="city"><option value="">كل المدن</option>{% for city in cities %}<option value="{{ city.id }}" {% if request.GET.city == city.id|stringformat:'s' %}selected{% endif %}>{{ city.name }}</option>{% endfor %}</select></div>
+      <div class="col-md-2"><select class="form-select" name="district"><option value="">كل المديريات</option>{% for district in districts %}<option value="{{ district.id }}" {% if request.GET.district == district.id|stringformat:'s' %}selected{% endif %}>{{ district.name }}</option>{% endfor %}</select></div>
       <div class="col-md-1"><button class="btn btn-primary w-100">بحث</button></div>
       <div class="col-md-2"><input class="form-control" type="number" step="0.1" name="min_rating" value="{{ request.GET.min_rating }}" placeholder="أقل تقييم"></div>
       <div class="col-md-2"><input class="form-control" type="number" name="min_experience" value="{{ request.GET.min_experience }}" placeholder="سنوات خبرة"></div>

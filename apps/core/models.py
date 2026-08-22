@@ -6,6 +6,38 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils import timezone
 
+
+class City(models.Model):
+    """A centrally managed, selectable city; never hard-code locations in forms."""
+    name = models.CharField('اسم المدينة', max_length=100, unique=True)
+    is_active = models.BooleanField('نشطة', default=True, db_index=True)
+    order = models.PositiveIntegerField('الترتيب', default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'مدينة'; verbose_name_plural = 'المدن'
+        ordering = ['order', 'name']
+
+    def __str__(self): return self.name
+
+
+class District(models.Model):
+    city = models.ForeignKey(City, on_delete=models.PROTECT, related_name='districts', verbose_name='المدينة')
+    name = models.CharField('اسم المديرية', max_length=100)
+    is_active = models.BooleanField('نشطة', default=True, db_index=True)
+    order = models.PositiveIntegerField('الترتيب', default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'مديرية'; verbose_name_plural = 'المديريات'
+        ordering = ['city__order', 'order', 'name']
+        constraints = [models.UniqueConstraint(fields=['city', 'name'], name='unique_district_per_city')]
+        indexes = [models.Index(fields=['city', 'is_active'])]
+
+    def __str__(self): return f'{self.city} - {self.name}'
+
 class TermsAndConditions(models.Model):
     version=models.CharField(max_length=30, unique=True)
     content=models.TextField()

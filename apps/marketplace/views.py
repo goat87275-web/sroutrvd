@@ -12,6 +12,7 @@ from django.db.models import Q, Count
 from .models import Category, Service, ProviderService
 from .forms import ServiceForm, ServiceSearchForm
 from apps.accounts.models import User
+from apps.core.models import City, District
 from apps.accounts.utils import is_provider_verified
 from apps.orders.models import Order
 
@@ -305,6 +306,8 @@ class ProviderSearchView(ListView):
         context=super().get_context_data(**kwargs)
         context['categories']=Category.objects.filter(is_active=True)
         context['services']=Service.objects.filter(status='active')
+        context['cities']=City.objects.filter(is_active=True)
+        context['districts']=District.objects.filter(is_active=True)
         context['params']=self.request.GET
         return context
 

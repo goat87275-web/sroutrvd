@@ -28,6 +28,8 @@ class User(AbstractUser):
     # معلومات إضافية
     phone = models.CharField('رقم الجوال', max_length=20, blank=True)
     city = models.CharField('المدينة', max_length=100, blank=True)
+    location_city = models.ForeignKey('core.City', on_delete=models.SET_NULL, null=True, blank=True, related_name='users', verbose_name='المدينة المختارة')
+    location_district = models.ForeignKey('core.District', on_delete=models.SET_NULL, null=True, blank=True, related_name='users', verbose_name='المديرية المختارة')
     
     # حالة الحساب
     is_verified = models.BooleanField('حساب موثق', default=False)
@@ -90,6 +92,10 @@ class ProviderProfile(models.Model):
     address = models.TextField('العنوان', blank=True)
     city = models.CharField('المدينة', max_length=100, blank=True, db_index=True)
     district = models.CharField('المنطقة', max_length=100, blank=True, db_index=True)
+    location_city = models.ForeignKey('core.City', on_delete=models.SET_NULL, null=True, blank=True, related_name='provider_profiles', verbose_name='المدينة المختارة')
+    location_district = models.ForeignKey('core.District', on_delete=models.SET_NULL, null=True, blank=True, related_name='provider_profiles', verbose_name='المديرية المختارة')
+    specializations = models.ManyToManyField('marketplace.Specialization', blank=True, related_name='providers', verbose_name='التخصصات')
+    qualification_choices = models.ManyToManyField('marketplace.Qualification', blank=True, related_name='providers', verbose_name='المؤهلات المختارة')
     latitude = models.DecimalField('خط العرض', max_digits=9, decimal_places=6, null=True, blank=True, validators=[MinValueValidator(-90), MaxValueValidator(90)])
     longitude = models.DecimalField('خط الطول', max_digits=9, decimal_places=6, null=True, blank=True, validators=[MinValueValidator(-180), MaxValueValidator(180)])
     service_radius = models.PositiveIntegerField('نطاق الخدمة بالكيلومتر', default=10)
@@ -128,6 +134,11 @@ class ProviderProfile(models.Model):
     
     def __str__(self):
         return f"ملف {self.user.username}"
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.location_district_id and self.location_city_id and self.location_district.city_id != self.location_city_id:
+            raise ValidationError({'location_district': 'المديرية المختارة لا تتبع المدينة.'})
     
     def get_completion_rate(self):
         """حساب نسبة إتمام الطلبات"""
@@ -175,3 +186,21 @@ class ProviderDocument(models.Model):
     def can_be_viewed_by(self, user):
         return user.is_authenticated and (user == self.provider.user or user.is_staff or user.has_perm('accounts.review_provider_document') or user.is_superuser)
     def __str__(self): return f'{self.provider} - {self.document_type}'
+
+
+class ProviderVerificationRequest(models.Model):
+    STATUS_CHOICES = [('pending', 'قيد المراجعة'), ('approved', 'مقبول'), ('rejected', 'مرفوض'), ('needs_documents', 'يحتاج مستندات')]
+    provider = models.ForeignKey(ProviderProfile, on_delete=models.CASCADE, related_name='verification_requests')
+    requested_services = models.ManyToManyField('marketplace.ManagedService', related_name='verification_requests', verbose_name='الخدمات المطلوبة')
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='pending', db_index=True)
+    admin_note = models.TextField('ملاحظة الإدارة', blank=True)
+    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_verification_requests')
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'طلب توثيق مقدم خدمة'; verbose_name_plural = 'طلبات توثيق مقدمي الخدمات'
+        ordering = ['-created_at']
+
+    def __str__(self): return f'طلب توثيق {self.provider}'
