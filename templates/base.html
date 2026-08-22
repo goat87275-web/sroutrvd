@@ -27,7 +27,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 
-<body>
+<body class="site-shell">
     <!-- شريط التنقل -->
     {% include 'partials/navbar.html' %}
 
@@ -35,7 +35,7 @@
     {% include 'partials/messages.html' %}
 
     <!-- المحتوى الرئيسي -->
-    <main class="main-content">
+    <main class="main-content" id="main-content" tabindex="-1">
         {% block content %}{% endblock %}
     </main>
 
