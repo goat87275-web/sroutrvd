@@ -5,13 +5,13 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero-section">
+<section class="hero-section hero-premium">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8 mx-auto text-center">
+                <span class="eyebrow animate-fadeInUp"><i class="bi bi-patch-check-fill"></i> سوق خدمات موثوق</span>
                 <h1 class="display-4 fw-bold mb-4 animate-fadeInUp">
-                    <i class="bi bi-stars ms-3"></i>
-                    مرحباً بك في منصة سوق الخدمات
+                    اعثر على الخدمة المناسبة، <span class="hero-emphasis">بثقة وسهولة</span>
                 </h1>
                 <p class="lead mb-4 animate-fadeInUp" style="animation-delay: 0.2s;">
                     اكتشف أفضل مقدمي الخدمات في مختلف المجالات. ابحث، اطلب، واحصل على ما تحتاجه بسهولة وأمان.
@@ -40,11 +40,11 @@
                 </div>
 
                 <!-- شريط البحث -->
-                <div class="search-box animate-fadeInUp" style="animation-delay: 0.6s;">
+                <div class="search-box search-command animate-fadeInUp" style="animation-delay: 0.6s;">
                     <form action="{% url 'marketplace:global_search' %}" method="get" class="row g-2">
-                        <div class="col-md-8">
+                        <div class="col-md-8"><label class="visually-hidden" for="hero-search">ابحث عن خدمة أو مقدم خدمة</label>
                             <input type="text" name="q" class="form-control form-control-lg"
-                                placeholder="ابحث عن خدمة أو مقدم خدمة... (مثال: تصميم، برمجة، تسويق)" style="text-align: right;">
+                                id="hero-search" placeholder="ابحث عن خدمة أو مقدم خدمة..." style="text-align: right;">
                         </div>
                         <div class="col-md-4">
                             <button type="submit" class="btn btn-primary btn-lg w-100">
@@ -54,6 +54,7 @@
                         </div>
                     </form>
                 </div>
+                <div class="hero-links animate-fadeInUp" style="animation-delay:.7s"><a href="{% url 'marketplace:provider_search' %}"><i class="bi bi-geo-alt"></i> استكشف مقدمي الخدمات حسب الموقع</a><span></span><a href="{% url 'marketplace:category_list' %}"><i class="bi bi-grid"></i> تصفح التصنيفات</a></div>
             </div>
         </div>
     </div>

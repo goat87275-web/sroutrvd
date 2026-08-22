@@ -7,7 +7,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
-from .models import User, ProviderProfile, ProviderDocumentType, ProviderDocument
+from .models import User, ProviderProfile, ProviderDocumentType, ProviderDocument, ProviderVerificationRequest
 from apps.core.services import audit, notify
 
 
@@ -136,3 +136,29 @@ class ProviderDocumentAdmin(admin.ModelAdmin):
     def request_more_documents(self, request, queryset):
         self._review(request, queryset, 'needs_additional_documents', 'documents_requested')
     request_more_documents.short_description = 'طلب مستندات إضافية'
+
+
+@admin.register(ProviderVerificationRequest)
+class ProviderVerificationRequestAdmin(admin.ModelAdmin):
+    list_display=['provider','status','reviewed_by','reviewed_at','created_at']
+    list_filter=['status','created_at']
+    search_fields=['provider__user__username','provider__user__email','requested_services__name']
+    filter_horizontal=['requested_services']
+    readonly_fields=['created_at','updated_at','reviewed_at']
+    fieldsets=(('الطلب',{'fields':('provider','requested_services')}),('قرار الإدارة',{'fields':('status','admin_note','reviewed_by','reviewed_at')}),('التواريخ',{'fields':('created_at','updated_at'),'classes':('collapse',)}))
+
+    def save_model(self, request, obj, form, change):
+        if change and 'status' in form.changed_data and obj.status in {'approved','rejected','needs_documents'}:
+            obj.reviewed_by=request.user; obj.reviewed_at=timezone.now()
+        super().save_model(request, obj, form, change)
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        verification=form.instance; profile=verification.provider
+        if verification.status == 'approved':
+            from apps.marketplace.models import ProviderService
+            for service in verification.requested_services.filter(is_active=True):
+                ProviderService.objects.update_or_create(provider=profile, catalog_service=service, defaults={'price':0, 'is_active':True, 'approval_status':'active'})
+            profile.status='active'; profile.verification_status='verified'; profile.verified_by=request.user; profile.verified_at=timezone.now(); profile.admin_notes=verification.admin_note; profile.save()
+        elif verification.status in {'rejected','needs_documents'}:
+            profile.status='inactive'; profile.verification_status=verification.status; profile.admin_notes=verification.admin_note; profile.save()

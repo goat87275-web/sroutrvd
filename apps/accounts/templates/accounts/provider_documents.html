@@ -26,10 +26,16 @@
     </div>
   </div>
 
-  <form method="post" enctype="multipart/form-data" class="card card-body shadow-sm mb-4">
+  <form method="post" enctype="multipart/form-data" class="card card-body shadow-sm mb-4 loading-form">
     {% csrf_token %}
-    {{ form|crispy }}
-    <button class="btn btn-primary"><i class="bi bi-upload ms-2"></i>رفع ملف</button>
+    <div class="upload-dropzone" data-upload-dropzone>
+      <i class="bi bi-cloud-arrow-up"></i><strong>اسحب المستند هنا أو اختره من جهازك</strong>
+      <span>PDF أو صور أو مستندات Word — حتى 5MB</span>
+      {{ form.document_type|as_crispy_field }}
+      {{ form.file|as_crispy_field }}
+      <output class="upload-file-name" aria-live="polite"></output>
+    </div>
+    <button class="btn btn-primary align-self-start"><i class="bi bi-upload ms-2"></i>رفع المستند للمراجعة</button>
   </form>
 
   <div class="table-responsive card shadow-sm">
@@ -53,3 +59,6 @@
   </div>
 </div>
 {% endblock %}
+{% block extra_js %}<script>
+document.querySelectorAll('[data-upload-dropzone]').forEach(zone => { const input=zone.querySelector('input[type=file]'), output=zone.querySelector('output'); if(!input)return; input.addEventListener('change',()=>output.textContent=input.files[0]?`تم اختيار: ${input.files[0].name}`:''); ['dragenter','dragover'].forEach(event=>zone.addEventListener(event,e=>{e.preventDefault();zone.classList.add('is-dragging')}));['dragleave','drop'].forEach(event=>zone.addEventListener(event,e=>{e.preventDefault();zone.classList.remove('is-dragging')}));zone.addEventListener('drop',e=>{if(e.dataTransfer.files.length){input.files=e.dataTransfer.files;input.dispatchEvent(new Event('change'))}});});
+</script>{% endblock %}

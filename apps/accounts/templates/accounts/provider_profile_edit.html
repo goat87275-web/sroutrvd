@@ -47,7 +47,7 @@
             <div class="row g-3">
               <div class="col-md-6">{{ provider_form.display_name|as_crispy_field }}</div>
               <div class="col-md-6">{{ provider_form.business_name|as_crispy_field }}</div>
-              <div class="col-md-6">{{ provider_form.specialization|as_crispy_field }}</div>
+              <div class="col-md-6">{{ provider_form.specializations|as_crispy_field }}</div>
               <div class="col-md-6">{{ provider_form.hourly_rate|as_crispy_field }}</div>
               <div class="col-12">
                 {% if profile.profile_image %}<div class="mb-2"><img src="{{ profile.profile_image.url }}" alt="Profile" class="rounded border" style="max-width:150px;max-height:150px;object-fit:cover;"></div>{% endif %}
@@ -65,7 +65,7 @@
               <div class="col-md-4">{{ provider_form.experience_years|as_crispy_field }}</div>
               <div class="col-md-4">{{ provider_form.service_radius|as_crispy_field }}</div>
               <div class="col-md-4">{{ provider_form.availability|as_crispy_field }}</div>
-              <div class="col-md-6">{{ provider_form.qualifications|as_crispy_field }}</div>
+              <div class="col-md-6">{{ provider_form.qualification_choices|as_crispy_field }}</div>
               <div class="col-md-6">{{ provider_form.experience|as_crispy_field }}</div>
               <div class="col-12 form-check form-switch ps-0">{{ provider_form.is_available|as_crispy_field }}</div>
             </div>
@@ -76,9 +76,8 @@
           <div class="card-header bg-info text-white py-3"><h5 class="mb-0"><i class="bi bi-geo-alt ms-2"></i>4. الموقع والخريطة</h5></div>
           <div class="card-body">
             <div class="row g-3">
-              <div class="col-md-6">{{ user_form.city|as_crispy_field }}</div>
-              <div class="col-md-6">{{ provider_form.city|as_crispy_field }}</div>
-              <div class="col-md-6">{{ provider_form.district|as_crispy_field }}</div>
+              <div class="col-md-6">{{ provider_form.location_city|as_crispy_field }}</div>
+              <div class="col-md-6">{{ provider_form.location_district|as_crispy_field }}</div>
               <div class="col-12">{{ provider_form.address|as_crispy_field }}</div>
             </div>
             {{ provider_form.latitude }}{{ provider_form.longitude }}
@@ -151,8 +150,11 @@
       </form>
 
       <form id="commission-accept-form" method="post" action="{% url 'accounts:accept_commission_policy' %}" class="d-none">{% csrf_token %}</form>
-      <form method="post" action="{% url 'accounts:provider_submit_review' %}" class="text-end">
+      <form method="post" action="{% url 'accounts:provider_submit_review' %}" class="card card-body shadow-sm text-end">
         {% csrf_token %}
+        <h5 class="text-end">7. الخدمات المطلوبة للتوثيق</h5>
+        <p class="text-muted">اختر فقط خدمات القائمة المركزية التي تريد تقديمها. تعتمد الخدمات بعد موافقة الإدارة.</p>
+        {{ verification_form.requested_services|as_crispy_field }}
         <button class="btn btn-success" {% if not can_submit_for_review %}disabled{% endif %}><i class="bi bi-send-check ms-2"></i>إرسال الحساب للمراجعة</button>
       </form>
     </div>
@@ -203,5 +205,16 @@
   map.on('click', function(e){ placeMarker(e.latlng); });
   setTimeout(function(){ map.invalidateSize(); }, 250);
 })();
+document.querySelectorAll('select[name$="location_city"]').forEach((city) => {
+  const prefix = city.id.replace(/location_city$/, '');
+  const district = document.getElementById(prefix + 'location_district');
+  if (!district) return;
+  city.addEventListener('change', async () => {
+    district.innerHTML = '<option value="">اختر المديرية</option>';
+    if (!city.value) return;
+    const data = await fetch('{% url "accounts:districts_for_city" %}?city=' + encodeURIComponent(city.value)).then(r => r.json());
+    data.districts.forEach(item => district.add(new Option(item.name, item.id)));
+  });
+});
 </script>
 {% endblock %}

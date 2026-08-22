@@ -1,14 +1,14 @@
 <!-- شريط التنقل الرئيسي الاحترافي -->
-<nav class="navbar navbar-expand-lg navbar-light sticky-top">
+<a class="skip-link" href="#main-content">تخطَّ إلى المحتوى</a>
+<nav class="navbar navbar-expand-lg navbar-light sticky-top site-navbar" aria-label="التنقل الرئيسي">
     <div class="container">
         <!-- الشعار -->
         <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'home' %}">
-            <i class="bi bi-stars ms-2" style="font-size: 1.5rem;"></i>
-            سوق الخدمات
+            <span class="brand-mark" aria-hidden="true"><i class="bi bi-stars"></i></span><span>سوق الخدمات</span>
         </a>
 
         <!-- زر القائمة للشاشات الصغيرة -->
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="فتح قائمة التنقل">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -62,8 +62,8 @@
             </ul>
 
             
-            <form class="d-flex me-lg-3 my-2 my-lg-0" method="get" action="{% url 'marketplace:global_search' %}">
-                <input class="form-control form-control-sm" name="q" placeholder="🔍 ابحث عن خدمة أو مقدم..." value="{{ request.GET.q }}">
+            <form class="nav-search d-flex me-lg-3 my-2 my-lg-0" method="get" action="{% url 'marketplace:global_search' %}" role="search">
+                <i class="bi bi-search" aria-hidden="true"></i><input class="form-control form-control-sm" name="q" aria-label="البحث في الخدمات ومقدمي الخدمات" placeholder="ابحث عن خدمة أو مقدم..." value="{{ request.GET.q }}">
             </form>
 
             <ul class="navbar-nav">
@@ -72,7 +72,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown"
                         role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="user-avatar me-2">
+                        <div class="user-avatar me-2" aria-hidden="true">
                             <i class="bi bi-person-circle"></i>
                         </div>
                         <span>{{ user.get_full_name|default:user.username }}</span>
@@ -136,21 +136,3 @@
         </div>
     </div>
 </nav>
-
-<style>
-    .user-avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: var(--gradient-purple);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.2rem;
-    }
-
-    .navbar-toggler:focus {
-        box-shadow: none;
-    }
-</style>

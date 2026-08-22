@@ -8,6 +8,39 @@ from django.urls import reverse
 from apps.accounts.models import User
 
 
+class CatalogChoice(models.Model):
+    """Shared fields for admin-owned marketplace lookup tables."""
+    name = models.CharField('الاسم', max_length=120, unique=True)
+    is_active = models.BooleanField('نشط', default=True, db_index=True)
+    order = models.PositiveIntegerField('الترتيب', default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+        ordering = ['order', 'name']
+
+    def __str__(self): return self.name
+
+
+class Specialization(CatalogChoice):
+    class Meta(CatalogChoice.Meta):
+        verbose_name = 'تخصص مقدم خدمة'; verbose_name_plural = 'تخصصات مقدمي الخدمات'
+
+
+class Qualification(CatalogChoice):
+    class Meta(CatalogChoice.Meta):
+        verbose_name = 'مؤهل'; verbose_name_plural = 'المؤهلات'
+
+
+class ManagedService(CatalogChoice):
+    category = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, blank=True, related_name='managed_services', verbose_name='التصنيف')
+    description = models.TextField('الوصف', blank=True)
+    class Meta(CatalogChoice.Meta):
+        verbose_name = 'خدمة أساسية'; verbose_name_plural = 'الخدمات الأساسية'
+        indexes = [models.Index(fields=['category', 'is_active', 'order'])]
+
+
 class Category(models.Model):
     """
     تصنيفات الخدمات (مع دعم التصنيفات الفرعية)
@@ -285,20 +318,28 @@ class Service(models.Model):
 class ProviderService(models.Model):
     PRICE_TYPE_CHOICES = Service.PRICE_TYPE_CHOICES
     provider = models.ForeignKey('accounts.ProviderProfile', on_delete=models.CASCADE, related_name='provider_services')
-    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='provider_services')
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='provider_services', null=True, blank=True)
+    catalog_service = models.ForeignKey(ManagedService, on_delete=models.PROTECT, related_name='provider_services', null=True, blank=True, verbose_name='الخدمة الأساسية')
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     price_type = models.CharField(max_length=20, choices=PRICE_TYPE_CHOICES, default='fixed')
     estimated_duration = models.PositiveIntegerField(default=1, help_text='Days')
     is_active = models.BooleanField(default=True, db_index=True)
+    STATUS_CHOICES = [('pending', 'قيد المراجعة'), ('approved', 'مقبولة'), ('rejected', 'مرفوضة'), ('active', 'نشطة'), ('suspended', 'موقوفة')]
+    approval_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:
         verbose_name='خدمة مقدم الخدمة'; verbose_name_plural='خدمات مقدمي الخدمات'
-        unique_together=[('provider','service')]
+        constraints = [
+            models.UniqueConstraint(fields=['provider', 'service'], condition=models.Q(service__isnull=False), name='unique_provider_listing_service'),
+            models.UniqueConstraint(fields=['provider', 'catalog_service'], condition=models.Q(catalog_service__isnull=False), name='unique_provider_catalog_service'),
+        ]
         indexes=[models.Index(fields=['service','is_active']), models.Index(fields=['provider','is_active'])]
     def clean(self):
         from django.core.exceptions import ValidationError
+        if self.catalog_service_id and not self.catalog_service.is_active:
+            raise ValidationError('الخدمة المختارة غير نشطة أو لم تعد متاحة.')
         if not (self.provider.status == 'active' and self.provider.verification_status == 'verified'):
             raise ValidationError('يجب تفعيل/توثيق حساب مقدم الخدمة قبل إضافة الخدمات.')
     def __str__(self): return f'{self.provider} - {self.service}'
