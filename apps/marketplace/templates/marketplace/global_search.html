@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
 {% block title %}البحث العام{% endblock %}
 {% block content %}
-<div class="container py-4">
-  <h1 class="h3 mb-3"><i class="bi bi-search ms-2"></i>البحث العام</h1>
-  <form method="get" class="input-group input-group-lg mb-4"><input class="form-control" name="q" value="{{ q }}" placeholder="ابحث عن خدمة أو مقدم خدمة أو تصنيف..."><button class="btn btn-primary">بحث</button></form>
+<div class="container py-5">
+  <section class="search-hero mb-4"><span class="eyebrow">بحث شامل</span><h1>اعثر على ما تحتاجه</h1><p>ابحث في الخدمات ومقدمي الخدمات والتصنيفات من مكان واحد.</p><form method="get" class="input-group input-group-lg"><input class="form-control" name="q" value="{{ q }}" aria-label="مصطلح البحث" placeholder="ما الذي تبحث عنه؟"><button class="btn btn-light">بحث <i class="bi bi-arrow-left"></i></button></form></section>
   <div class="row g-4">
-    <div class="col-lg-4"><h4>مقدمو الخدمات</h4>{% for provider in providers %}<div class="border rounded p-2 mb-2"><a href="{% url 'accounts:provider_detail' provider.pk %}">{{ provider.provider_profile.display_name|default:provider.username }}</a><br><small>{{ provider.provider_profile.city }} {{ provider.provider_profile.district }}</small></div>{% empty %}<p class="text-muted">لا توجد نتائج.</p>{% endfor %}</div>
-    <div class="col-lg-4"><h4>الخدمات</h4>{% for service in services %}<div class="border rounded p-2 mb-2"><a href="{{ service.get_absolute_url }}">{{ service.title }}</a><br><small>{{ service.category }}</small></div>{% empty %}<p class="text-muted">لا توجد نتائج.</p>{% endfor %}</div>
-    <div class="col-lg-4"><h4>التصنيفات</h4>{% for category in categories %}<div class="border rounded p-2 mb-2"><a href="{{ category.get_absolute_url }}">{{ category.name }}</a></div>{% empty %}<p class="text-muted">لا توجد نتائج.</p>{% endfor %}</div>
+    <div class="col-lg-4"><section class="search-result-column"><h2><i class="bi bi-people ms-1"></i> مقدمو الخدمات</h2>{% for provider in providers %}<a class="search-result-item" href="{% url 'accounts:provider_detail' provider.pk %}"><strong>{{ provider.provider_profile.display_name|default:provider.username }}</strong><small><i class="bi bi-geo-alt"></i> {{ provider.provider_profile.city }} {{ provider.provider_profile.district }}</small></a>{% empty %}<p class="text-muted small pt-3">لا توجد نتائج.</p>{% endfor %}</section></div>
+    <div class="col-lg-4"><section class="search-result-column"><h2><i class="bi bi-briefcase ms-1"></i> الخدمات</h2>{% for service in services %}<a class="search-result-item" href="{{ service.get_absolute_url }}"><strong>{{ service.title }}</strong><small>{{ service.category }}</small></a>{% empty %}<p class="text-muted small pt-3">لا توجد نتائج.</p>{% endfor %}</section></div>
+    <div class="col-lg-4"><section class="search-result-column"><h2><i class="bi bi-grid ms-1"></i> التصنيفات</h2>{% for category in categories %}<a class="search-result-item" href="{{ category.get_absolute_url }}"><strong>{{ category.name }}</strong></a>{% empty %}<p class="text-muted small pt-3">لا توجد نتائج.</p>{% endfor %}</section></div>
   </div>
   {% if admin_users or admin_orders or admin_payments %}<hr><h3>نتائج الإدارة</h3><div class="row"><div class="col-md-4"><h5>Users</h5>{% for u in admin_users %}<p>{{ u.username }} - {{ u.email }}</p>{% endfor %}</div><div class="col-md-4"><h5>Orders</h5>{% for o in admin_orders %}<p>{{ o.order_number }} - {{ o.status }}</p>{% endfor %}</div><div class="col-md-4"><h5>Payments</h5>{% for p in admin_payments %}<p>{{ p.transaction_id }} - {{ p.status }}</p>{% endfor %}</div></div>{% endif %}
 </div>

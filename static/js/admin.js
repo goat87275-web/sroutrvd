@@ -4,5 +4,5 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!sidebar || !toggle) return;
   toggle.setAttribute('aria-label', 'طي أو توسيع القائمة الجانبية');
   toggle.addEventListener('click', () => setTimeout(() => document.body.classList.toggle('admin-sidebar-collapsed', document.body.classList.contains('sidebar-collapse')), 20));
-  document.querySelectorAll('.nav-sidebar .nav-link').forEach(link => { if (!link.getAttribute('aria-label')) link.setAttribute('aria-label', link.textContent.trim()); });
+  document.querySelectorAll('.nav-sidebar .nav-link').forEach(link => { const label = link.textContent.trim(); if (!link.getAttribute('aria-label')) link.setAttribute('aria-label', label); link.setAttribute('title', label); });
 });
